@@ -4,7 +4,7 @@
 
 TEST_F(SimpleTests, test_earley) {
     Grammar G({"S->aSbS", "S->"});
-    Algo parser(G);
+    Earley parser(G);
     ASSERT_TRUE(parser.predict("abab"));
     ASSERT_TRUE(parser.predict(""));
     ASSERT_TRUE(parser.predict("aabbababaabb"));
@@ -34,7 +34,7 @@ TEST_F(SimpleTests, test_earley) {
 }
 
 TEST_F(SimpleTests, unit_scan) {
-    Algo parser((Grammar()));
+    Earley parser((Grammar()));
     auto& D = parser.get_D();
     D.resize(2);
     D[0]['+'].emplace('S', std::string("S+S") + END, 1, 1);
@@ -44,15 +44,15 @@ TEST_F(SimpleTests, unit_scan) {
     parser.scan(1, '+');
     ASSERT_EQ(D[1]['S'].size(), 2);
     ASSERT_EQ(D[1]['T'].size(), 2);
-    ASSERT_TRUE(D[1]['T'].count(Configuration('S', std::string("T+T") + END, 2, 3)));
-    ASSERT_TRUE(D[1]['T'].count(Configuration('S', std::string("S+T") + END, 2, 2)));
-    ASSERT_TRUE(D[1]['S'].count(Configuration('S', std::string("S+S") + END, 2, 1)));
-    ASSERT_TRUE(D[1]['S'].count(Configuration('S', std::string("T+T+S") + END, 4, 3)));
+    ASSERT_TRUE(D[1]['T'].count(EarleySituation('S', std::string("T+T") + END, 2, 3)));
+    ASSERT_TRUE(D[1]['T'].count(EarleySituation('S', std::string("S+T") + END, 2, 2)));
+    ASSERT_TRUE(D[1]['S'].count(EarleySituation('S', std::string("S+S") + END, 2, 1)));
+    ASSERT_TRUE(D[1]['S'].count(EarleySituation('S', std::string("T+T+S") + END, 4, 3)));
 }
 
 TEST_F(SimpleTests, unit_predict) {
     Grammar G({"S->K", "T->a", "T->b"});
-    Algo parser(G);
+    Earley parser(G);
     auto& D = parser.get_D();
     D.resize(1);
     D[0]['S'].emplace('S', std::string("S+S") + END, 2, 1);
@@ -63,13 +63,13 @@ TEST_F(SimpleTests, unit_predict) {
     ASSERT_EQ(D[0]['K'].size(), 2);
     ASSERT_EQ(D[0]['a'].size(), 1);
     ASSERT_EQ(D[0]['b'].size(), 1);
-    ASSERT_TRUE(D[0]['K'].count(Configuration('S', std::string("K") + END, 0, 0)));
-    ASSERT_TRUE(D[0]['a'].count(Configuration('T', std::string("a") + END, 0, 0)));
-    ASSERT_TRUE(D[0]['b'].count(Configuration('T', std::string("b") + END, 0, 0)));
+    ASSERT_TRUE(D[0]['K'].count(EarleySituation('S', std::string("K") + END, 0, 0)));
+    ASSERT_TRUE(D[0]['a'].count(EarleySituation('T', std::string("a") + END, 0, 0)));
+    ASSERT_TRUE(D[0]['b'].count(EarleySituation('T', std::string("b") + END, 0, 0)));
 }
 
 TEST_F(SimpleTests, unit_complete) {
-    Algo parser((Grammar()));
+    Earley parser((Grammar()));
     auto& D = parser.get_D();
     D.resize(3);
     D[1]['S'].emplace('S', std::string("S+S+S") + END, 0, 0);
@@ -80,9 +80,9 @@ TEST_F(SimpleTests, unit_complete) {
     parser.complete(2);
     ASSERT_EQ(D[2]['+'].size(), 2);
     ASSERT_EQ(D[2][END].size(), 3);
-    ASSERT_TRUE(D[2]['+'].count(Configuration('S', std::string("S+S+S") + END, 1, 0)));
-    ASSERT_TRUE(D[2]['+'].count(Configuration('S', std::string("S+S+S") + END, 3, 0)));
-    ASSERT_TRUE(D[2][END].count(Configuration('S', std::string("S+S+S") + END, 5, 0)));
+    ASSERT_TRUE(D[2]['+'].count(EarleySituation('S', std::string("S+S+S") + END, 1, 0)));
+    ASSERT_TRUE(D[2]['+'].count(EarleySituation('S', std::string("S+S+S") + END, 3, 0)));
+    ASSERT_TRUE(D[2][END].count(EarleySituation('S', std::string("S+S+S") + END, 5, 0)));
 }
 
 
@@ -91,10 +91,20 @@ TEST_F(SimpleTests, input_test) {
     in << "2 S->aSbS S->";
     Grammar G;
     in >> G;
-    Algo parser(G);
+    Earley parser(G);
     ASSERT_TRUE(parser.predict("ab"));
 }
 
+TEST_F(SimpleTests, test_LR1) {
+    Grammar G({"S->aSbS", "S->"});
+    LR1 parser(G);
+    ASSERT_TRUE(parser.predict("abab"));
+    ASSERT_TRUE(parser.predict(""));
+    ASSERT_TRUE(parser.predict("aabbababaabb"));
+    ASSERT_FALSE(parser.predict("aabbababbaba"));
+    ASSERT_FALSE(parser.predict("ba"));
+    ASSERT_FALSE(parser.predict("ababa"));
+}
 
 
 
