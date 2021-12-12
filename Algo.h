@@ -4,21 +4,22 @@
 #include <vector>
 #include <unordered_map>
 #include <set>
+#include <stack>
 
 const char END = '$';
 const char START = '#'; // #->S instead of S'->S
 
 bool is_nonterminal(char symbol);
 
-struct Configuration {
+struct EarleySituation {
     char left;
     std::string right;
     size_t dot;
     size_t index = 0;
-    Configuration(char left, const std::string& right, size_t dot, size_t index) : left(left), right(right), dot(dot), index(index) {}
-    Configuration(const Configuration& other)  = default;
+    EarleySituation(char left, const std::string& right, size_t dot, size_t index) : left(left), right(right), dot(dot), index(index) {}
+    EarleySituation(const EarleySituation& other)  = default;
 
-    bool operator<(const Configuration& other) const;
+    bool operator<(const EarleySituation& other) const;
 };
 
 struct Grammar {
@@ -34,19 +35,19 @@ struct Grammar {
 std::istream& operator>>(std::istream& in, Grammar& grammar);
 
 
-using Set = std::unordered_map<char, std::set<Configuration>>;
+using Set = std::unordered_map<char, std::set<EarleySituation>>;
 
-class Algo {
+class Earley {
 private:
     Grammar rules;
     std::vector<Set> D;
     bool is_changed = false;
 
-    void add(std::set<Configuration>&, const Configuration&);
+    void add(std::set<EarleySituation>&, const EarleySituation&);
 public:
-    Algo() = default;
+    Earley() = default;
 
-    Algo(const Grammar& grammar);
+    Earley(const Grammar& grammar);
 
     void fit(const Grammar& grammar);
 
@@ -59,6 +60,72 @@ public:
     const std::vector<Set>& complete(size_t set_index);
 
     std::vector<Set>& get_D();
+};
+
+
+struct LR1Situation {
+    char left;
+    std::string right;
+    size_t dot;
+    char next;
+    LR1Situation(char left, const std::string& right, size_t dot, char next) : left(left), right(right), dot(dot), next(next) {}
+    LR1Situation(const LR1Situation& other)  = default;
+
+    bool operator==(const LR1Situation& other) const;
+    bool operator<(const LR1Situation& other) const;
+};
+
+struct Action {
+    char name;
+    size_t count;
+    char reduce_case;
+    Action(char name, size_t count, char reduce_case = 0) : name(name), count(count), reduce_case(reduce_case) {};
+    Action() = default;
+
+    bool operator==(const Action& other) const;
+};
+
+struct Rule {
+    char left;
+    std::string right;
+    Rule(char left, const std::string& right) : left(left), right(right) {}
+
+    bool operator<(const Rule& other) const;
+};
+
+using Condition = std::unordered_map<char, std::set<LR1Situation>>;
+
+class LR1 {
+private:
+    Grammar grammar;
+    std::unordered_map<char, std::set<char>> firsts;
+    std::vector<Condition> conditions;
+    std::vector<std::unordered_map<char, size_t>> edges;
+    std::vector<std::unordered_map<char, Action>> table;
+    bool is_changed = true;
+
+    void init();
+    void insert_table(size_t condition, char symbol, const Action& value);
+public:
+    LR1() = default;
+
+    LR1(const Grammar& grammar);
+
+    void fit(const Grammar& grammar);
+
+    bool predict(std::string);
+
+    void fill_firsts();
+    void fill_conditions();
+
+    size_t add_condition(const std::set<LR1Situation>& prev);
+
+
+    void closure(Condition& condition);
+
+    std::set<char> get_first(const std::string& word);
+
+    void fill_table();
 };
 
 
