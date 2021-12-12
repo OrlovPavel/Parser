@@ -85,14 +85,6 @@ struct Action {
     bool operator==(const Action& other) const;
 };
 
-struct Rule {
-    char left;
-    std::string right;
-    Rule(char left, const std::string& right) : left(left), right(right) {}
-
-    bool operator<(const Rule& other) const;
-};
-
 using Condition = std::unordered_map<char, std::set<LR1Situation>>;
 
 class LR1 {
@@ -117,6 +109,7 @@ public:
 
     void fill_firsts();
     void fill_conditions();
+    void fill_table();
 
     size_t add_condition(const std::set<LR1Situation>& prev);
 
@@ -124,8 +117,6 @@ public:
     void closure(Condition& condition);
 
     std::set<char> get_first(const std::string& word);
-
-    void fill_table();
 };
 
 
