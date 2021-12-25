@@ -43,7 +43,7 @@ private:
     std::vector<Set> D;
     bool is_changed = false;
 
-    void add(std::set<EarleySituation>&, const EarleySituation&);
+    void add_situation(std::set<EarleySituation>&, const EarleySituation&);
 public:
     Earley() = default;
 

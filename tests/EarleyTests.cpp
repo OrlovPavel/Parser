@@ -1,5 +1,5 @@
 #include "SimpleTests.h"
-#include "../Algo.h"
+#include "../Earley.h"
 #include <iostream>
 
 TEST_F(SimpleTests, test_earley) {

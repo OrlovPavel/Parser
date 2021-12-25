@@ -58,11 +58,8 @@ bool EarleySituation::operator<(const EarleySituation& other) const{
     return false;
 }
 
-void Earley::add(std::set<EarleySituation>& set, const EarleySituation& situation) {
-    size_t prev_size = set.size();
-    set.insert(situation);
-    if(prev_size != set.size())
-        is_changed = true;
+void Earley::add_situation(std::set<EarleySituation>& set, const EarleySituation& situation) {
+        is_changed = set.insert(situation).second;
 }
 
 const std::vector<Set>& Earley::scan(size_t set_index, char symbol) {
@@ -73,7 +70,7 @@ const std::vector<Set>& Earley::scan(size_t set_index, char symbol) {
         EarleySituation new_conf(situation);
         new_conf.dot += 1;
         char new_next = new_conf.right[new_conf.dot];
-        add(D[set_index][new_next], new_conf);
+        add_situation(D[set_index][new_next], new_conf);
     }
     return D;
 }
@@ -85,7 +82,7 @@ const std::vector<Set>& Earley::predict(size_t set_index) {
             for (auto& right: rules[next]) {
                 EarleySituation new_conf(next, right, 0, set_index);
                 char new_next = new_conf.right[new_conf.dot];
-                add(D[set_index][new_next], new_conf);
+                add_situation(D[set_index][new_next], new_conf);
             }
         }
     }
@@ -102,7 +99,7 @@ const std::vector<Set>& Earley::complete(size_t set_index) {
                     EarleySituation new_conf(prev_conf);
                     ++new_conf.dot;
                     char new_next = new_conf.right[new_conf.dot];
-                    add(D[set_index][new_next], new_conf);
+                    add_situation(D[set_index][new_next], new_conf);
                 }
             }
         }
@@ -163,14 +160,6 @@ bool LR1Situation::operator<(const LR1Situation& other) const {
 
 bool LR1Situation::operator==(const LR1Situation& other) const {
     return left == other.left && right == other.right && dot == other.dot && next == other.next;
-}
-
-bool Rule::operator<(const Rule& other) const {
-    if(left < other.left)
-        return true;
-    if(left == other.left && right < other.right)
-        return true;
-    return false;
 }
 
 bool Action::operator==(const Action& other) const {
