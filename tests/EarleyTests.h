@@ -1,12 +1,12 @@
-#ifndef PARSER_SIMPLETESTS_H
-#define PARSER_SIMPLETESTS_H
+#ifndef PARSER_EARLEYTESTS_H
+#define PARSER_EARLEYTESTS_H
 
 #pragma once
 
 #include "gtest/gtest.h"
 
-class SimpleTests : public ::testing::Test {
+class EarleyTests : public ::testing::Test {
 
 };
 
-#endif //PARSER_SIMPLETESTS_H
+#endif //PARSER_EARLEYTESTS_H

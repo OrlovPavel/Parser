@@ -1,8 +1,8 @@
-#include "SimpleTests.h"
+#include "EarleyTests.h"
 #include "../Earley.h"
 #include <iostream>
 
-TEST_F(SimpleTests, test_earley) {
+TEST_F(EarleyTests, test_Erley) {
     Grammar G({"S->aSbS", "S->"});
     Earley parser(G);
     ASSERT_TRUE(parser.predict("abab"));
@@ -33,7 +33,7 @@ TEST_F(SimpleTests, test_earley) {
     ASSERT_FALSE(parser.predict("(b+b)"));
 }
 
-TEST_F(SimpleTests, unit_scan) {
+TEST_F(EarleyTests, unit_scan) {
     Earley parser((Grammar()));
     auto& D = parser.get_D();
     D.resize(2);
@@ -50,7 +50,7 @@ TEST_F(SimpleTests, unit_scan) {
     ASSERT_TRUE(D[1]['S'].count(EarleySituation('S', std::string("T+T+S") + END, 4, 3)));
 }
 
-TEST_F(SimpleTests, unit_predict) {
+TEST_F(EarleyTests, unit_predict) {
     Grammar G({"S->K", "T->a", "T->b"});
     Earley parser(G);
     auto& D = parser.get_D();
@@ -68,7 +68,7 @@ TEST_F(SimpleTests, unit_predict) {
     ASSERT_TRUE(D[0]['b'].count(EarleySituation('T', std::string("b") + END, 0, 0)));
 }
 
-TEST_F(SimpleTests, unit_complete) {
+TEST_F(EarleyTests, unit_complete) {
     Earley parser((Grammar()));
     auto& D = parser.get_D();
     D.resize(3);
@@ -86,24 +86,13 @@ TEST_F(SimpleTests, unit_complete) {
 }
 
 
-TEST_F(SimpleTests, input_test) {
+TEST_F(EarleyTests, input_test) {
     std::stringstream in;
     in << "2 S->aSbS S->";
     Grammar G;
     in >> G;
     Earley parser(G);
     ASSERT_TRUE(parser.predict("ab"));
-}
-
-TEST_F(SimpleTests, test_LR1) {
-    Grammar G({"S->aSbS", "S->"});
-    LR1 parser(G);
-    ASSERT_TRUE(parser.predict("abab"));
-    ASSERT_TRUE(parser.predict(""));
-    ASSERT_TRUE(parser.predict("aabbababaabb"));
-    ASSERT_FALSE(parser.predict("aabbababbaba"));
-    ASSERT_FALSE(parser.predict("ba"));
-    ASSERT_FALSE(parser.predict("ababa"));
 }
 
 
